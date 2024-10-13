@@ -7,10 +7,28 @@ import json
 with open('lookup_tables.json', 'r') as f:
     lookup_tables = json.load(f)
 
+def int2bin(num: int, length: int):
+    '''
+    Convert an integer to binary string.
+    '''
+    return bin(num)[2:].zfill(length)
+
+def bin2int(binary: str):
+    '''
+    Convert a binary string to integer.
+    '''
+    return int(binary, 2)
+
+def xor(a: str, b: str):
+    '''
+    XOR operation.
+    '''
+    return ''.join(['1' if a[i] != b[i] else '0' for i in range(len(a))])
+
 class KeyGenerator:
-    def __init__(self, key: list):
+    def __init__(self, key: str):
         self.key = key
-        # self.round_keys = self.generate_round_keys()
+        self.round_keys = self.generate_keys()
 
     def PC_1(self):
         '''
@@ -39,4 +57,3 @@ class KeyGenerator:
         
         return round_keys
 
-    
