@@ -30,9 +30,33 @@ def xor(a: str, b: str) -> str:
     return ''.join(['1' if a[i] != b[i] else '0' for i in range(len(a))])
 
 
+def pad(text_bytes: bytes) -> bytes:
+    """
+    Apply PKCS#7 padding to the input bytes to make its length a multiple of 8 bytes.
+    """
+    pad_len = 8 - (len(text_bytes) % 8)
+    padding = bytes([pad_len] * pad_len)
+    return text_bytes + padding
+
+
+def unpad(text_bytes: bytes) -> bytes:
+    """
+    Remove PKCS#7 padding from the input bytes.
+    """
+    if not text_bytes:
+        raise ValueError("Input data is empty, cannot unpad.")
+    pad_len = text_bytes[-1]
+    if pad_len < 1 or pad_len > 8:
+        raise ValueError("Invalid padding detected.")
+    if text_bytes[-pad_len:] != bytes([pad_len] * pad_len):
+        raise ValueError("Invalid padding bytes.")
+    return text_bytes[:-pad_len]
+
 class KeyGenerator:
     def __init__(self, key: str):
         self.key = key
+        # self.key = "0110001011001011011001111000011001101101011011101111001011000100"
+        # self.key = "0110001001100100011001110110100001101011011011010110111001110000"
         self.round_keys = self.generate_keys()
 
     def PC_1(self):
@@ -156,8 +180,10 @@ class DES:
         if mode == 'encryption':
             # Convert plaintext to binary
             text_bytes = text.encode('utf-8')
+            # Convert plaintext to binary with PKCS#7 padding
+            text_bytes = pad(text_bytes)
             if len(text_bytes) > 8:
-                raise ValueError("Text too long for single DES block (max 8 bytes)")
+                raise ValueError("Text too long for single DES block after padding (max 8 bytes)")
             text_bytes = text_bytes.ljust(8, b'\0')  # Pad to 8 bytes if necessary
             text_int = int.from_bytes(text_bytes, byteorder='big')
             text_bin = int_to_bin(text_int, 64)
@@ -190,8 +216,12 @@ class DES:
         final_bytes = final_int.to_bytes(8, byteorder='big')
 
         if mode == 'decryption':
-            # Remove padding and decode to string
-            return final_bytes.rstrip(b'\0').decode('utf-8', errors='ignore')
+            # Remove PKCS#7 padding and decode to string
+            try:
+                unpadded_bytes = unpad(final_bytes)
+                return unpadded_bytes.decode('utf-8', errors='ignore')
+            except ValueError as e:
+                raise ValueError(f"Padding error during decryption: {e}")
         else:
             # Return encrypted data as hex string for readability
             return final_bytes.hex()
@@ -199,7 +229,7 @@ class DES:
 
 if __name__ == '__main__':
     # Example 64-bit key
-    key = 0x133457799BBCDFF1
+    key = 12345678
 
     # Ensure the key is 64 bits
     if not (0 <= key < 1 << 64):
