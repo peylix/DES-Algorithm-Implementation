@@ -53,11 +53,18 @@ class KeyGenerator:
     def __init__(self, key: bytes):
         """
         Initialize KeyGenerator with a key of any length.
-        The key is padded using PKCS#7 to 8 bytes or truncated if longer.
+        The key is padded using PKCS#7 to 8 bytes.
         """
-        self.key = pad(key)
+        self.key = self.prepare_key(key)
         self.key_bin = ''.join([int_to_bin(byte, 8) for byte in self.key])
         self.round_keys = self.generate_keys()
+
+    def prepare_key(self, key: bytes) -> bytes:
+        if len(key) < 8:
+            return key.ljust(8, b'\0')
+        elif len(key) > 8:
+            return key[:8]
+        return key
 
     def PC_1(self):
         """
@@ -103,7 +110,7 @@ class DES:
         Initialize DES with a key of any length (bytes).
         """
         self.subkeys = KeyGenerator(key).round_keys
-    
+
     def permute(self, text: str, table: list) -> str:
         """
         General permutation function based on the provided table.
@@ -245,14 +252,14 @@ class DES:
 
 
 if __name__ == '__main__':
-    key = "12345678"
+    key = "1234567890"
     plaintext = "bonjour"
 
     des = DES(key.encode('utf-8'))
     
     # Encryption
     encrypted = des.encrypt(plaintext)
-    print(f'Encrypted (hex): {encrypted}')
+    print(f'Encrypted: {encrypted}')
     
     # Decryption
     decrypted = des.decrypt(encrypted)
