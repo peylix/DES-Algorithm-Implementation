@@ -208,14 +208,12 @@ with gr.Blocks(theme=gr.themes.Soft(), title="DES Demo") as demo:
             2. Enter an **8-character key**. *Note that this key must be the same for encryption and decryption.*
             3. Enter the **plaintext** message you wish to encrypt or upload a plain text file containing the plaintext.
             4. Click the **Encrypt** button to obtain the ciphertext.
-            5. Optionally, download the ciphertext as a text file.
 
         - **🔓 Decryption:**
             1. Navigate to the **Decrypt** tab.
             2. Enter the **8-character key** used during encryption.
             3. Enter the **ciphertext** (in hexadecimal) you wish to decrypt or upload a text file containing the ciphertext.
             4. Click the **Decrypt** button to retrieve the original plaintext.
-            5. Optionally, download the plaintext as a text file.
 
         ### 👱‍♂️ Author:
         - **Sichen Li** (BJUT ID: 21372309, UCD ID: 21207464)
