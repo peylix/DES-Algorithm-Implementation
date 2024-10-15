@@ -1,4 +1,5 @@
 # DES Algorithm Implementation
+
 A Python implementation of the Data Encryption Standard (DES) based on FIPS PUB 46-3 and a corresponding user-friendly UI for BDIC3025J Security & Privacy.
 
 ## Functionalities
@@ -24,4 +25,4 @@ A Python implementation of the Data Encryption Standard (DES) based on FIPS PUB 
 
 ## Screenshots
 
-[UI](https://github.com/peylix/DES-Algorithm-Implementation/blob/main/images/ui.png)
+![UI](https://github.com/peylix/DES-Algorithm-Implementation/blob/main/images/ui.png)
