@@ -8,6 +8,13 @@ with open('lookup_tables.json', 'r') as f:
 def int_to_bin(num: int, length: int) -> str:
     """
     Convert an integer to a binary string with a specified length.
+
+    Parameters:
+    - num (int): The integer to convert.
+    - length (int): The length of the binary string.
+
+    Returns:
+    - str: The binary string.
     """
     return bin(num)[2:].zfill(length)
 
@@ -15,6 +22,12 @@ def int_to_bin(num: int, length: int) -> str:
 def bin_to_int(binary: str) -> int:
     """
     Convert a binary string to an integer.
+
+    Parameters:
+    - binary (str): The binary string to convert.
+
+    Returns:
+    - int: The integer value.
     """
     return int(binary, 2)
 
@@ -22,6 +35,13 @@ def bin_to_int(binary: str) -> int:
 def xor(a: str, b: str) -> str:
     """
     XOR operation between two binary strings.
+
+    Parameters:
+    - a (str): The first binary string.
+    - b (str): The second binary string.
+
+    Returns:
+    - str: The XOR result as a binary string.
     """
     return ''.join(['1' if a[i] != b[i] else '0' for i in range(len(a))])
 
@@ -29,6 +49,12 @@ def xor(a: str, b: str) -> str:
 def pad(text_bytes: bytes) -> bytes:
     """
     Apply PKCS#7 padding to the input bytes to make its length a multiple of 8 bytes.
+
+    Parameters:
+    - text_bytes (bytes): The input bytes to pad.
+
+    Returns:
+    - bytes: The padded bytes.
     """
     pad_len = 8 - (len(text_bytes) % 8)
     padding = bytes([pad_len] * pad_len)
@@ -38,6 +64,12 @@ def pad(text_bytes: bytes) -> bytes:
 def unpad(text_bytes: bytes) -> bytes:
     """
     Remove PKCS#7 padding from the input bytes.
+
+    Parameters:
+    - text_bytes (bytes): The input bytes to unpad.
+
+    Returns:
+    - bytes: The unpadded bytes.
     """
     if not text_bytes:
         raise ValueError("Input data is empty, cannot unpad.")
@@ -54,12 +86,26 @@ class KeyGenerator:
         """
         Initialize KeyGenerator with a key of any length.
         The key is padded using PKCS#7 to 8 bytes.
+
+        Parameters:
+        - key (bytes): The key to use for generating round keys.
+
+        Attributes:
+        - key (bytes): The padded key.
+        - key_bin (str): The key in binary format.
+        - round_keys (list): The 16 round keys.
         """
         self.key = self.prepare_key(key)
         self.key_bin = ''.join([int_to_bin(byte, 8) for byte in self.key])
         self.round_keys = self.generate_keys()
 
     def prepare_key(self, key: bytes) -> bytes:
+        """
+        Pad the key.
+
+        If the key is less than 8 bytes, pad it with null bytes.
+        If the key is more than 8 bytes, truncate it to 8 bytes.
+        """
         if len(key) < 8:
             return key.ljust(8, b'\0')
         elif len(key) > 8:
@@ -83,6 +129,13 @@ class KeyGenerator:
     def shift_left(self, key_half: str, shifts: int) -> str:
         """
         Left shift the key_half by the specified number of shifts.
+
+        Parameters:
+        - key_half (str): The key half to shift.
+        - shifts (int): The number of shifts.
+
+        Returns:
+        - str: The shifted key half.
         """
         return key_half[shifts:] + key_half[:shifts]
 
@@ -108,6 +161,12 @@ class DES:
     def __init__(self, key: bytes):
         """
         Initialize DES with a key of any length (bytes).
+
+        Parameters:
+        - key (bytes): The key to use for encryption and decryption.
+
+        Attributes:
+        - subkeys (list): The 16 round subkeys.
         """
         self.subkeys = KeyGenerator(key).round_keys
 
@@ -146,6 +205,14 @@ class DES:
     def feistel(self, left: str, right: str, subkey: str) -> tuple:
         """
         Perform one Feistel round.
+
+        Parameters:
+        - left (str): The left half of the block.
+        - right (str): The right half of the block.
+        - subkey (str): The subkey for the round.
+
+        Returns:
+        - tuple: The new left and right halves.
         """
         new_right = xor(left, self.round(right, subkey))
         return right, new_right
@@ -153,6 +220,13 @@ class DES:
     def process_block(self, block: bytes, mode: str) -> bytes:
         """
         Encrypt or decrypt a single 8-byte block.
+
+        Parameters:
+        - block (bytes): The 8-byte block to process.
+        - mode (str): 'encryption' or 'decryption'.
+
+        Returns:
+        - bytes: The processed block
         """
         if len(block) != 8:
             raise ValueError("Block size must be exactly 8 bytes.")
@@ -194,6 +268,13 @@ class DES:
         Encrypt or decrypt the input text.
         For encryption, text is plaintext bytes.
         For decryption, text is ciphertext bytes.
+
+        Parameters:
+        - text (bytes): The input text to process.
+        - mode (str): 'encryption' or 'decryption'.
+
+        Returns:
+        - bytes: The processed text.
         """
         
         if mode == 'encryption':
